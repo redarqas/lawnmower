@@ -94,16 +94,16 @@ object Application {
     def solveIterator(iter: Iterator[String]): List[Mower] = {
       val joystick = if (iter.hasNext) Joystick(limits(iter.next))
       else throw InvalidInputException("Invalid file structure : unable to read top limits")
-
-      def actions(joystick: Joystick, group: iter.GroupedIterator[String]): List[Mower] = {
-        def foldIter(e: Seq[String], acc: List[Mower]): List[Mower] = e match {
-          case List(s, i) => joystick.instruct(state(s), instructions(i)) :: acc
+      import scala.collection.mutable.ListBuffer
+      def actions(joystick: Joystick, group: iter.GroupedIterator[String]): ListBuffer[Mower] = {
+        def foldIter(e: Seq[String], acc: ListBuffer[Mower]): ListBuffer[Mower] = e match {
+          case List(s, i) => joystick.instruct(state(s), instructions(i)) +=: acc
           case _ => throw InvalidInputException("Invalid file structure : unable to read mower init state and instruction")
         }
-        group.foldRight(Nil: List[Mower])(foldIter _)
+        group.foldRight(ListBuffer[Mower]())(foldIter _)
       }
 
-      actions(joystick, iter grouped 2)
+      actions(joystick, iter grouped 2).toList
     }
 
     //Resoudre dpeuis un echaine de caractéres
